@@ -73,16 +73,10 @@ fn test_aead(aead_alg: &'static aead::Algorithm, test_file: test::File) {
         for _ in 0..tag_len {
             s_in_out.push(0);
         }
-        let s_key = aead::SealingKey::new(aead_alg, &key_bytes[..])?;
+        let s_key = aead::Key::new(aead_alg, &key_bytes[..])?;
         let s_result = {
             let nonce = aead::Nonce::try_assume_unique_for_key(&nonce).unwrap();
-            aead::seal_in_place(
-                &s_key,
-                nonce,
-                aead::Aad::from(&ad),
-                &mut s_in_out[..],
-                tag_len,
-            )
+            s_key.seal_in_place(nonce, aead::Aad::from(&ad), &mut s_in_out[..], tag_len)
         };
 
         ct.extend(tag);
@@ -92,7 +86,7 @@ fn test_aead(aead_alg: &'static aead::Algorithm, test_file: test::File) {
             assert_eq!(&ct[..], &s_in_out[..ct.len()]);
         }
 
-        let o_key = aead::OpeningKey::new(aead_alg, &key_bytes[..])?;
+        let o_key = aead::Key::new(aead_alg, &key_bytes[..])?;
 
         // In release builds, test all prefix lengths from 0 to 4096 bytes.
         // Debug builds are too slow for this, so for those builds, only
@@ -166,8 +160,7 @@ fn test_aead(aead_alg: &'static aead::Algorithm, test_file: test::File) {
             }
             o_in_out.extend_from_slice(&ct[..]);
             let nonce = aead::Nonce::try_assume_unique_for_key(&nonce).unwrap();
-            let o_result = aead::open_in_place(
-                &o_key,
+            let o_result = o_key.open_in_place(
                 nonce,
                 aead::Aad::from(&ad),
                 *in_prefix_len,
@@ -197,32 +190,32 @@ fn test_aead_key_sizes(aead_alg: &'static aead::Algorithm) {
     let key_data = vec![0u8; key_len * 2];
 
     // Key is the right size.
-    assert!(aead::OpeningKey::new(aead_alg, &key_data[..key_len]).is_ok());
-    assert!(aead::SealingKey::new(aead_alg, &key_data[..key_len]).is_ok());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &key_data[..key_len]).is_ok());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &key_data[..key_len]).is_ok());
 
     // Key is one byte too small.
-    assert!(aead::OpeningKey::new(aead_alg, &key_data[..(key_len - 1)]).is_err());
-    assert!(aead::SealingKey::new(aead_alg, &key_data[..(key_len - 1)]).is_err());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &key_data[..(key_len - 1)]).is_err());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &key_data[..(key_len - 1)]).is_err());
 
     // Key is one byte too large.
-    assert!(aead::OpeningKey::new(aead_alg, &key_data[..(key_len + 1)]).is_err());
-    assert!(aead::SealingKey::new(aead_alg, &key_data[..(key_len + 1)]).is_err());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &key_data[..(key_len + 1)]).is_err());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &key_data[..(key_len + 1)]).is_err());
 
     // Key is half the required size.
-    assert!(aead::OpeningKey::new(aead_alg, &key_data[..(key_len / 2)]).is_err());
-    assert!(aead::SealingKey::new(aead_alg, &key_data[..(key_len / 2)]).is_err());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &key_data[..(key_len / 2)]).is_err());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &key_data[..(key_len / 2)]).is_err());
 
     // Key is twice the required size.
-    assert!(aead::OpeningKey::new(aead_alg, &key_data[..(key_len * 2)]).is_err());
-    assert!(aead::SealingKey::new(aead_alg, &key_data[..(key_len * 2)]).is_err());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &key_data[..(key_len * 2)]).is_err());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &key_data[..(key_len * 2)]).is_err());
 
     // Key is empty.
-    assert!(aead::OpeningKey::new(aead_alg, &[]).is_err());
-    assert!(aead::SealingKey::new(aead_alg, &[]).is_err());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &[]).is_err());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &[]).is_err());
 
     // Key is one byte.
-    assert!(aead::OpeningKey::new(aead_alg, &[0]).is_err());
-    assert!(aead::SealingKey::new(aead_alg, &[0]).is_err());
+    assert!(aead::Key::<aead::Opening>::new(aead_alg, &[0]).is_err());
+    assert!(aead::Key::<aead::Sealing>::new(aead_alg, &[0]).is_err());
 }
 
 // Test that we reject non-standard nonce sizes.
@@ -305,15 +298,15 @@ fn aead_chacha20_poly1305_openssh() {
 fn test_aead_key_debug() {
     let key_bytes = [0; 32];
 
-    let key = aead::OpeningKey::new(&aead::AES_256_GCM, &key_bytes).unwrap();
+    let key = aead::Key::<aead::Opening>::new(&aead::AES_256_GCM, &key_bytes).unwrap();
     assert_eq!(
-        "OpeningKey { key: Key { algorithm: AES_256_GCM } }",
+        "Key { algorithm: AES_256_GCM, role: Opening(()) }",
         format!("{:?}", key)
     );
 
-    let key = aead::SealingKey::new(&aead::CHACHA20_POLY1305, &key_bytes).unwrap();
+    let key = aead::Key::<aead::Sealing>::new(&aead::CHACHA20_POLY1305, &key_bytes).unwrap();
     assert_eq!(
-        "SealingKey { key: Key { algorithm: CHACHA20_POLY1305 } }",
+        "Key { algorithm: CHACHA20_POLY1305, role: Sealing(()) }",
         format!("{:?}", key)
     );
 }
