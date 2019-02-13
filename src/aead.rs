@@ -23,6 +23,7 @@
 
 use self::block::{Block, BLOCK_LEN};
 use crate::{constant_time, cpu, error, polyfill};
+use core::ops::{Bound, RangeBounds};
 
 pub use self::{
     aes_gcm::{AES_128_GCM, AES_256_GCM},
@@ -97,17 +98,36 @@ impl<R: Role> Key<R> {
 impl Key<Opening> {
     /// Authenticates and decrypts (“opens”) data in place.
     ///
-    /// The input may have a prefix that is `in_prefix_len` bytes long; any such
-    /// prefix is ignored on input and overwritten on output. The last
-    /// `key.algorithm().tag_len()` bytes of `in_out` must be the tag. The part
-    /// of `in_out` between the prefix and the tag is the input ciphertext.
+    /// The input is `&in_out[ciphertext_and_tag]`. Use `..` as
+    /// `ciphertext_and_tag` if the entirety of `in_out` is the input.
     ///
-    /// When `open_in_place()` returns `Ok(plaintext)`, the decrypted output is
-    /// `plaintext`, which is `&mut in_out[..plaintext.len()]`. That is,
-    /// the output plaintext is written at the beginning of `in_out`. To put it
-    /// another way, the ciphertext is shifted forward `in_prefix_len` bytes and
-    /// then decrypted in place. To have the output overwrite the input without
-    /// shifting, pass 0 as `in_prefix_len`.
+    /// As the input ciphertext is transformed to plaintext, it is shifted to
+    /// the start of `in_out`. When `open_in_place()` returns `Ok(plaintext)`,
+    /// the decrypted output is `plaintext`, which is `&mut
+    /// in_out[..plaintext.len()]`; the output plaintext is always written to
+    /// the beginning of `in_out`, even if the input doesn't start at the
+    /// beginning of `in_out`. For example, the following two code fragments
+    /// are equivalent:
+    ///
+    /// ```skip
+    /// key.open_in_place(nonce, aad, in_out, in_out, in_prefix_len..)?;
+    /// ```
+    ///
+    /// ```skip
+    /// in_out.copy_within(in_prefix_len.., 0);
+    /// key.open_in_place(nonce, aad, in_out, in_out, ..(in_out.len() - in_prefix_len))?;
+    /// ```
+    ///
+    /// Similarly, these are equivalent (when `copy_within` doesn't panic):
+    ///
+    /// ```skip
+    /// key.open_in_place(nonce, aad, in_out, in_out, start..end)?;
+    /// ```
+    ///
+    /// ```skip
+    /// in_out.copy_within(start..end, 0);
+    /// key.open_in_place(nonce, aad, in_out, in_out, ..(end - start));
+    /// ```
     ///
     /// When `open_in_place()` returns `Err(..)`, `in_out` may have been
     /// overwritten in an unspecified way.
@@ -126,21 +146,40 @@ impl Key<Opening> {
     /// Output: [Plaintext][Plaintext][Plaintext]
     ///        “Split stream reassembled in place”
     /// ```
-    ///
-    /// Let's say the header is always 5 bytes (like TLS 1.2) and the tag is
-    /// always 16 bytes (as for AES-GCM and ChaCha20-Poly1305). Then for
-    /// this example, `in_prefix_len` would be `5` for the first packet, `(5
-    /// + 16) + 5` for the second packet, and `(2 * (5 + 16)) + 5` for the
-    /// third packet.
-    ///
-    /// (The input/output buffer is expressed as combination of `in_prefix_len`
-    /// and `in_out` because Rust's type system
-    /// does not allow us to have two slices, one mutable and one immutable,
-    /// that reference overlapping memory.)
-    pub fn open_in_place<'in_out, A: AsRef<[u8]>>(
-        &self, nonce: Nonce, Aad(aad): Aad<A>, in_prefix_len: usize, in_out: &'in_out mut [u8],
+    pub fn open_in_place<'in_out, A: AsRef<[u8]>, I: RangeBounds<usize>>(
+        &self, nonce: Nonce, aad: Aad<A>, in_out: &'in_out mut [u8], ciphertext_and_tag: I,
     ) -> Result<&'in_out mut [u8], error::Unspecified> {
-        self.open_in_place_(nonce, Aad::from(aad.as_ref()), in_prefix_len, in_out)
+        let in_out = match ciphertext_and_tag.end_bound() {
+            Bound::Unbounded => in_out,
+            Bound::Included(end) => {
+                if *end >= in_out.len() {
+                    return Err(error::Unspecified);
+                }
+                &mut in_out[..=*end]
+            },
+            Bound::Excluded(end) => {
+                if *end > in_out.len() {
+                    return Err(error::Unspecified);
+                }
+                &mut in_out[..*end]
+            },
+        };
+        let in_prefix_len = match ciphertext_and_tag.start_bound() {
+            Bound::Unbounded => 0,
+            Bound::Included(start) => {
+                if *start > in_out.len() {
+                    return Err(error::Unspecified);
+                }
+                *start
+            },
+            Bound::Excluded(start) => {
+                if *start >= in_out.len() {
+                    return Err(error::Unspecified);
+                }
+                start + 1
+            },
+        };
+        self.open_in_place_(nonce, Aad::from(aad.0.as_ref()), in_prefix_len, in_out)
     }
 
     fn open_in_place_<'in_out>(

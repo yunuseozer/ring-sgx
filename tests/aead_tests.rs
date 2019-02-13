@@ -159,8 +159,8 @@ fn test_aead(aead_alg: &'static aead::Algorithm, test_file: test::File) {
             let o_result = o_key.open_in_place(
                 nonce,
                 aead::Aad::from(&ad),
-                *in_prefix_len,
                 &mut o_in_out[..],
+                *in_prefix_len..,
             );
             match error {
                 None => {
