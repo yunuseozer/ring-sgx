@@ -22,10 +22,7 @@
 //! [`crypto.cipher.AEAD`]: https://golang.org/pkg/crypto/cipher/#AEAD
 
 use self::block::{Block, BLOCK_LEN};
-use crate::{
-    constant_time, cpu, error,
-    polyfill::{self, convert::*},
-};
+use crate::{constant_time, cpu, error, polyfill};
 
 pub use self::{
     aes_gcm::{AES_128_GCM, AES_256_GCM},
@@ -145,10 +142,10 @@ impl Key<Opening> {
     /// and `ciphertext_and_tag_modified_in_place` because Rust's type system
     /// does not allow us to have two slices, one mutable and one immutable,
     /// that reference overlapping memory.)
-    pub fn open_in_place<'a, A: AsRef<[u8]>>(
+    pub fn open_in_place<'in_out, A: AsRef<[u8]>>(
         &self, nonce: Nonce, Aad(aad): Aad<A>, in_prefix_len: usize,
-        ciphertext_and_tag_modified_in_place: &'a mut [u8],
-    ) -> Result<&'a mut [u8], error::Unspecified> {
+        ciphertext_and_tag_modified_in_place: &'in_out mut [u8],
+    ) -> Result<&'in_out mut [u8], error::Unspecified> {
         self.open_in_place_(
             nonce,
             Aad::from(aad.as_ref()),
@@ -157,10 +154,10 @@ impl Key<Opening> {
         )
     }
 
-    fn open_in_place_<'a>(
+    fn open_in_place_<'in_out>(
         &self, nonce: Nonce, aad: Aad<&[u8]>, in_prefix_len: usize,
-        ciphertext_and_tag_modified_in_place: &'a mut [u8],
-    ) -> Result<&'a mut [u8], error::Unspecified> {
+        ciphertext_and_tag_modified_in_place: &'in_out mut [u8],
+    ) -> Result<&'in_out mut [u8], error::Unspecified> {
         let ciphertext_and_tag_len = ciphertext_and_tag_modified_in_place
             .len()
             .checked_sub(in_prefix_len)
@@ -211,30 +208,25 @@ impl Key<Sealing> {
     /// `out_suffix_capacity` must be `self.algorithm().tag_len()`.
     ///
     /// `aad` is the additional authenticated data, if any.
-    pub fn seal_in_place<A: AsRef<[u8]>>(
-        &self, nonce: Nonce, Aad(aad): Aad<A>, in_out: &mut [u8], out_suffix_capacity: usize,
-    ) -> Result<usize, error::Unspecified> {
-        self.seal_in_place_(nonce, Aad::from(aad.as_ref()), in_out, out_suffix_capacity)
+    pub fn seal_in_place<A: AsRef<[u8]>, InOut: AsMut<[u8]> + for<'t> Extend<&'t u8>>(
+        &self, nonce: Nonce, Aad(aad): Aad<A>, in_out: &mut InOut,
+    ) -> Result<(), error::Unspecified> {
+        let Tag(tag) = self.seal_in_place_(nonce, Aad::from(aad.as_ref()), in_out.as_mut())?;
+        in_out.extend(tag.as_ref());
+        Ok(())
     }
 
     fn seal_in_place_(
-        &self, nonce: Nonce, aad: Aad<&[u8]>, in_out: &mut [u8], out_suffix_capacity: usize,
-    ) -> Result<usize, error::Unspecified> {
-        if out_suffix_capacity < self.algorithm.tag_len() {
-            return Err(error::Unspecified);
-        }
-        let in_out_len = in_out
-            .len()
-            .checked_sub(out_suffix_capacity)
-            .ok_or(error::Unspecified)?;
-        check_per_nonce_max_bytes(self.algorithm, in_out_len)?;
-        let (in_out, tag_out) = in_out.split_at_mut(in_out_len);
-
-        let tag_out: &mut [u8; TAG_LEN] = tag_out.try_into_()?;
-        let Tag(tag) = (self.algorithm.seal)(&self.inner, nonce, aad, in_out, self.cpu_features);
-        tag_out.copy_from_slice(tag.as_ref());
-
-        Ok(in_out_len + TAG_LEN)
+        &self, nonce: Nonce, aad: Aad<&[u8]>, in_out: &mut [u8],
+    ) -> Result<Tag, error::Unspecified> {
+        check_per_nonce_max_bytes(self.algorithm, in_out.len())?;
+        Ok((self.algorithm.seal)(
+            &self.inner,
+            nonce,
+            Aad::from(aad.0.as_ref()),
+            in_out,
+            self.cpu_features,
+        ))
     }
 }
 

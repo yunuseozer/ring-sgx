@@ -68,22 +68,18 @@ fn test_aead(aead_alg: &'static aead::Algorithm, test_file: test::File) {
             _ => (),
         };
 
-        let tag_len = aead_alg.tag_len();
-        let mut s_in_out = plaintext.clone();
-        for _ in 0..tag_len {
-            s_in_out.push(0);
-        }
         let s_key = aead::Key::new(aead_alg, &key_bytes[..])?;
+        let mut s_in_out = plaintext.clone();
         let s_result = {
             let nonce = aead::Nonce::try_assume_unique_for_key(&nonce).unwrap();
-            s_key.seal_in_place(nonce, aead::Aad::from(&ad), &mut s_in_out[..], tag_len)
+            s_key.seal_in_place(nonce, aead::Aad::from(&ad), &mut s_in_out)
         };
 
         ct.extend(tag);
 
-        if s_result.is_ok() {
-            assert_eq!(Ok(ct.len()), s_result);
-            assert_eq!(&ct[..], &s_in_out[..ct.len()]);
+        if let Ok(s_result) = s_result {
+            assert_eq!(s_result, ());
+            assert_eq!(&ct[..], &s_in_out[..]);
         }
 
         let o_key = aead::Key::new(aead_alg, &key_bytes[..])?;
