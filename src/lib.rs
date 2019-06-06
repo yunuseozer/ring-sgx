@@ -46,7 +46,7 @@
 // internally.
 #![deny(
     missing_docs,
-    unstable_features, // Used by `internal_benches`
+    //unstable_features, // Used by `internal_benches`
     unused_qualifications,
     variant_size_differences,
 )]
@@ -77,8 +77,7 @@
     no_std
 )]
 #![cfg_attr(feature = "internal_benches", allow(unstable_features), feature(test))]
-#![cfg_attr(target_env = "sgx", feature(rustc_private))]
-
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))] 
 #[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
 #[macro_use]
 extern crate sgx_tstd as std;
