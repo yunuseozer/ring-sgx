@@ -195,7 +195,7 @@ use self::darwin::fill as fill_impl;
 #[cfg(any(target_os = "fuchsia"))]
 use self::fuchsia::fill as fill_impl;
 
-#[cfg(any(target_os = "android", target_os = "linux"))]
+#[cfg(all(not(feature = "mesalock_sgx"), target_os = "linux"))]
 mod sysrand_chunk {
     use crate::{c, error};
 
@@ -244,31 +244,21 @@ mod sysrand_chunk {
     }
 }
 
-#[cfg(all(
-    target_arch = "wasm32",
-    target_vendor = "unknown",
-    target_os = "unknown",
-    target_env = "",
-))]
+#[cfg(feature = "mesalock_sgx")]
 mod sysrand_chunk {
     use crate::error;
 
-    pub fn chunk(mut dest: &mut [u8]) -> Result<usize, error::Unspecified> {
-        // This limit is specified in
-        // https://www.w3.org/TR/WebCryptoAPI/#Crypto-method-getRandomValues.
-        const MAX_LEN: usize = 65_536;
-        if dest.len() > MAX_LEN {
-            dest = &mut dest[..MAX_LEN];
-        };
+    extern {
+        fn sgx_read_rand(p: * mut u8, l: usize) -> u32;
+    }
 
-        let _ = web_sys::window()
-            .ok_or(error::Unspecified)?
-            .crypto()
-            .map_err(|_| error::Unspecified)?
-            .get_random_values_with_u8_array(dest)
-            .map_err(|_| error::Unspecified)?;
-
-        Ok(dest.len())
+    #[inline]
+    pub fn chunk(dest: &mut [u8]) -> Result<usize, error::Unspecified> {
+        match unsafe { sgx_read_rand(dest.as_mut_ptr(),
+                                     dest.len()) } {
+            0 => Ok(dest.len()),
+            _ => Err(error::Unspecified),
+        }
     }
 }
 

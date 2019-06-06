@@ -39,10 +39,11 @@ wasm_bindgen_test_configure!(run_in_browser);
 
 use core::ops::RangeFrom;
 use ring::{aead, error, test, test_file};
+use std::prelude::v1::*;
 
-#[test]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn aead_aes_gcm_128() {
+//#[test]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+pub fn aead_aes_gcm_128() {
     test_aead(
         &aead::AES_128_GCM,
         seal_with_key,
@@ -57,9 +58,9 @@ fn aead_aes_gcm_128() {
     );
 }
 
-#[test]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn aead_aes_gcm_256() {
+//#[test]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+pub fn aead_aes_gcm_256() {
     test_aead(
         &aead::AES_256_GCM,
         seal_with_key,
@@ -74,14 +75,14 @@ fn aead_aes_gcm_256() {
     );
 }
 
-#[cfg(any(
-    target_arch = "aarch64",
-    target_arch = "arm",
-    target_arch = "x86_64",
-    target_arch = "x86"
-))]
-#[test]
-fn aead_chacha20_poly1305() {
+//#[cfg(any(
+//    target_arch = "aarch64",
+//    target_arch = "arm",
+//    target_arch = "x86_64",
+//    target_arch = "x86"
+//))]
+//#[test]
+pub fn aead_chacha20_poly1305() {
     test_aead(
         &aead::CHACHA20_POLY1305,
         seal_with_key,
@@ -328,9 +329,9 @@ fn test_aead_key_sizes(aead_alg: &'static aead::Algorithm) {
 }
 
 // Test that we reject non-standard nonce sizes.
-#[allow(clippy::range_plus_one)]
-#[test]
-fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
+//#[allow(clippy::range_plus_one)]
+//#[test]
+pub fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     let nonce_len = aead::NONCE_LEN;
     let nonce = vec![0u8; nonce_len * 2];
 
@@ -346,15 +347,15 @@ fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     Ok(())
 }
 
-#[cfg(any(
-    target_arch = "aarch64",
-    target_arch = "arm",
-    target_arch = "x86_64",
-    target_arch = "x86"
-))]
-#[allow(clippy::range_plus_one)]
-#[test]
-fn aead_chacha20_poly1305_openssh() {
+//#[cfg(any(
+//    target_arch = "aarch64",
+//    target_arch = "arm",
+//    target_arch = "x86_64",
+//    target_arch = "x86"
+//))]
+//#[allow(clippy::range_plus_one)]
+//#[test]
+pub fn aead_chacha20_poly1305_openssh() {
     // TODO: test_aead_key_sizes(...);
 
     test::run(
@@ -400,16 +401,16 @@ fn aead_chacha20_poly1305_openssh() {
     );
 }
 
-#[test]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn test_tag_traits() {
+//#[test]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+pub fn test_tag_traits() {
     test::compile_time_assert_send::<aead::Tag>();
     test::compile_time_assert_sync::<aead::Tag>();
 }
 
-#[test]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn test_aead_key_debug() {
+//#[test]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+pub fn test_aead_key_debug() {
     let key_bytes = [0; 32];
     let nonce = [0; aead::NONCE_LEN];
 

@@ -75,13 +75,33 @@
     anonymous_parameters,
     trivial_casts,
     trivial_numeric_casts,
-    unstable_features,
+    //unstable_features,
     unused_extern_crates,
     unused_import_braces,
     unused_results,
-    warnings
+    //warnings
 )]
-#![no_std]
+#![cfg_attr(
+    any(
+        target_os = "redox",
+        all(
+            not(test),
+            not(feature = "use_heap"),
+            unix,
+            not(any(target_os = "macos", target_os = "ios")),
+            any(not(target_os = "linux"), feature = "dev_urandom_fallback")
+        ),
+        all(
+            feature = "mesalock_sgx",
+            not(target_env = "sgx"),
+        ),
+    ),
+    no_std
+)]
+#![cfg_attr(all(target_env = "sgx", target_vendor = "mesalock"), feature(rustc_private))] 
+#[cfg(all(feature = "mesalock_sgx", not(target_env = "sgx")))]
+#[macro_use]
+extern crate sgx_tstd as std;
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

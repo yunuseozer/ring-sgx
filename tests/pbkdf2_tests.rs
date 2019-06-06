@@ -40,8 +40,8 @@ use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 wasm_bindgen_test_configure!(run_in_browser);
 
 /// Test vectors from BoringSSL, Go, and other sources.
-#[test]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+//#[test]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
 pub fn pbkdf2_tests() {
     test::run(test_file!("pbkdf2_tests.txt"), |section, test_case| {
         assert_eq!(section, "");

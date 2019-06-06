@@ -36,8 +36,8 @@ use ring::{
 };
 
 /// Test vectors from BoringSSL.
-#[test]
-fn test_signature_ed25519() {
+//#[test]
+pub fn test_signature_ed25519() {
     test::run(test_file!("ed25519_tests.txt"), |section, test_case| {
         assert_eq!(section, "");
         let seed = test_case.consume_bytes("SEED");
@@ -87,8 +87,8 @@ fn test_signature_ed25519() {
     });
 }
 
-#[test]
-fn test_ed25519_from_seed_and_public_key_misuse() {
+//#[test]
+pub fn test_ed25519_from_seed_and_public_key_misuse() {
     const PRIVATE_KEY: &[u8] = include_bytes!("ed25519_test_private_key.bin");
     const PUBLIC_KEY: &[u8] = include_bytes!("ed25519_test_public_key.bin");
 
@@ -104,8 +104,8 @@ fn test_ed25519_from_seed_and_public_key_misuse() {
     assert!(Ed25519KeyPair::from_seed_and_public_key(PUBLIC_KEY, PRIVATE_KEY).is_err());
 }
 
-#[test]
-fn test_ed25519_from_pkcs8_unchecked() {
+//#[test]
+pub fn test_ed25519_from_pkcs8_unchecked() {
     // Just test that we can parse the input.
     test::run(
         test_file!("ed25519_from_pkcs8_unchecked_tests.txt"),
@@ -129,8 +129,8 @@ fn test_ed25519_from_pkcs8_unchecked() {
     );
 }
 
-#[test]
-fn test_ed25519_from_pkcs8() {
+//#[test]
+pub fn test_ed25519_from_pkcs8() {
     // Just test that we can parse the input.
     test::run(
         test_file!("ed25519_from_pkcs8_tests.txt"),
@@ -151,8 +151,8 @@ fn test_ed25519_from_pkcs8() {
     );
 }
 
-#[test]
-fn ed25519_test_public_key_coverage() {
+//#[test]
+pub fn ed25519_test_public_key_coverage() {
     const PRIVATE_KEY: &[u8] = include_bytes!("ed25519_test_private_key.p8");
     const PUBLIC_KEY: &[u8] = include_bytes!("ed25519_test_public_key.der");
     const PUBLIC_KEY_DEBUG: &str =

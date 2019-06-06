@@ -30,6 +30,7 @@
 )]
 
 use ring::{digest, error, hkdf, test, test_file};
+use std::prelude::v1::*;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
@@ -37,9 +38,9 @@ use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 #[cfg(target_arch = "wasm32")]
 wasm_bindgen_test_configure!(run_in_browser);
 
-#[test]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn hkdf_tests() {
+//#[test]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+pub fn hkdf_tests() {
     test::run(test_file!("hkdf_tests.txt"), |section, test_case| {
         assert_eq!(section, "");
         let alg = {

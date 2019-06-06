@@ -118,6 +118,12 @@ impl Prk {
         Self(hmac::Key::new(algorithm.hmac_algorithm(), value))
     }
 
+    /// Added by dingelish to support rustls key_schedule. From key
+    #[inline]
+    pub fn from_key(k: hmac::Key) -> Self {
+        Prk(k)
+    }
+
     /// The [HKDF-Expand] operation.
     ///
     /// [HKDF-Expand]: https://tools.ietf.org/html/rfc5869#section-2.3
