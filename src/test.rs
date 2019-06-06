@@ -123,8 +123,8 @@ use alloc::{format, string::String, vec::Vec};
 #[cfg(feature = "alloc")]
 use crate::{bits, digest, error};
 
-#[cfg(any(feature = "std", feature = "test_logging"))]
-extern crate std;
+//#[cfg(any(feature = "std", feature = "test_logging"))]
+//extern crate std;
 
 /// `compile_time_assert_clone::<T>();` fails to compile if `T` doesn't
 /// implement `Clone`.
@@ -288,7 +288,7 @@ impl TestCase {
 #[macro_export]
 macro_rules! test_file {
     ($file_name:expr) => {
-        crate::test::File {
+        ring::test::File {
             file_name: $file_name,
             contents: include_str!($file_name),
         }

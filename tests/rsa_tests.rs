@@ -31,7 +31,7 @@
     warnings
 )]
 
-#[cfg(feature = "alloc")]
+//#[cfg(feature = "alloc")]
 use ring::{
     error,
     io::der,
@@ -40,9 +40,9 @@ use ring::{
     test, test_file,
 };
 
-#[cfg(feature = "alloc")]
-#[test]
-fn rsa_from_pkcs8_test() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn rsa_from_pkcs8_test() {
     test::run(
         test_file!("rsa_from_pkcs8_tests.txt"),
         |section, test_case| {
@@ -63,9 +63,9 @@ fn rsa_from_pkcs8_test() {
     );
 }
 
-#[cfg(feature = "alloc")]
-#[test]
-fn test_signature_rsa_pkcs1_sign() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn test_signature_rsa_pkcs1_sign() {
     let rng = rand::SystemRandom::new();
     test::run(
         test_file!("rsa_pkcs1_sign_tests.txt"),
@@ -104,9 +104,9 @@ fn test_signature_rsa_pkcs1_sign() {
     );
 }
 
-#[cfg(feature = "alloc")]
-#[test]
-fn test_signature_rsa_pss_sign() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn test_signature_rsa_pss_sign() {
     test::run(
         test_file!("rsa_pss_sign_tests.txt"),
         |section, test_case| {
@@ -141,9 +141,9 @@ fn test_signature_rsa_pss_sign() {
     );
 }
 
-#[cfg(feature = "alloc")]
-#[test]
-fn test_signature_rsa_pkcs1_verify() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn test_signature_rsa_pkcs1_verify() {
     test::run(
         test_file!("rsa_pkcs1_verify_tests.txt"),
         |section, test_case| {
@@ -189,9 +189,9 @@ fn test_signature_rsa_pkcs1_verify() {
     );
 }
 
-#[cfg(feature = "alloc")]
-#[test]
-fn test_signature_rsa_pss_verify() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn test_signature_rsa_pss_verify() {
     test::run(
         test_file!("rsa_pss_verify_tests.txt"),
         |section, test_case| {
@@ -238,9 +238,9 @@ fn test_signature_rsa_pss_verify() {
 
 // Test for `primitive::verify()`. Read public key parts from a file
 // and use them to verify a signature.
-#[cfg(feature = "alloc")]
-#[test]
-fn test_signature_rsa_primitive_verification() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn test_signature_rsa_primitive_verification() {
     test::run(
         test_file!("rsa_primitive_verify_tests.txt"),
         |section, test_case| {
@@ -258,9 +258,9 @@ fn test_signature_rsa_primitive_verification() {
     )
 }
 
-#[cfg(feature = "alloc")]
-#[test]
-fn rsa_test_public_key_coverage() {
+//#[cfg(feature = "alloc")]
+//#[test]
+pub fn rsa_test_public_key_coverage() {
     const PRIVATE_KEY: &[u8] = include_bytes!("rsa_test_private_key_2048.p8");
     const PUBLIC_KEY: &[u8] = include_bytes!("rsa_test_public_key_2048.der");
     const PUBLIC_KEY_DEBUG: &str = include_str!("rsa_test_public_key_2048_debug.txt");
