@@ -33,7 +33,7 @@
 use core::num::NonZeroU32;
 use ring::{digest, error, pbkdf2, test, test_file};
 
-#[test]
+//#[test]
 pub fn pbkdf2_tests() {
     test::run(test_file!("pbkdf2_tests.txt"), |section, test_case| {
         assert_eq!(section, "");

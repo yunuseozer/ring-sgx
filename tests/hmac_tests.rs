@@ -32,8 +32,8 @@
 
 use ring::{digest, error, hmac, test, test_file};
 
-#[test]
-fn hmac_tests() {
+//#[test]
+pub fn hmac_tests() {
     test::run(test_file!("hmac_tests.txt"), |section, test_case| {
         assert_eq!(section, "");
         let digest_alg = test_case.consume_digest_alg("HMAC");
@@ -111,8 +111,8 @@ fn hmac_test_case_inner(
     Ok(())
 }
 
-#[test]
-fn hmac_debug() {
+//#[test]
+pub fn hmac_debug() {
     let key = hmac::Key::new(hmac::HMAC_SHA256, &[0; 32]);
     assert_eq!("Key { algorithm: SHA256 }", format!("{:?}", &key));
 

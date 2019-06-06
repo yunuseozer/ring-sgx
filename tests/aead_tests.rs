@@ -32,9 +32,10 @@
 
 use core::ops::RangeFrom;
 use ring::{aead, error, test, test_file};
+use std::prelude::v1::*;
 
-#[test]
-fn aead_aes_gcm_128() {
+//#[test]
+pub fn aead_aes_gcm_128() {
     test_aead(
         &aead::AES_128_GCM,
         seal_with_key,
@@ -49,8 +50,8 @@ fn aead_aes_gcm_128() {
     );
 }
 
-#[test]
-fn aead_aes_gcm_256() {
+//#[test]
+pub fn aead_aes_gcm_256() {
     test_aead(
         &aead::AES_256_GCM,
         seal_with_key,
@@ -65,8 +66,8 @@ fn aead_aes_gcm_256() {
     );
 }
 
-#[test]
-fn aead_chacha20_poly1305() {
+//#[test]
+pub fn aead_chacha20_poly1305() {
     test_aead(
         &aead::CHACHA20_POLY1305,
         seal_with_key,
@@ -312,8 +313,8 @@ fn test_aead_key_sizes(aead_alg: &'static aead::Algorithm) {
 }
 
 // Test that we reject non-standard nonce sizes.
-#[test]
-fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
+//#[test]
+pub fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     let nonce_len = aead::NONCE_LEN;
     let nonce = vec![0u8; nonce_len * 2];
 
@@ -329,8 +330,8 @@ fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     Ok(())
 }
 
-#[test]
-fn aead_chacha20_poly1305_openssh() {
+//#[test]
+pub fn aead_chacha20_poly1305_openssh() {
     // TODO: test_aead_key_sizes(...);
 
     test::run(
@@ -376,14 +377,14 @@ fn aead_chacha20_poly1305_openssh() {
     );
 }
 
-#[test]
-fn test_tag_traits() {
+//#[test]
+pub fn test_tag_traits() {
     test::compile_time_assert_send::<aead::Tag>();
     test::compile_time_assert_sync::<aead::Tag>();
 }
 
-#[test]
-fn test_aead_key_debug() {
+//#[test]
+pub fn test_aead_key_debug() {
     let key_bytes = [0; 32];
     let nonce = [0; aead::NONCE_LEN];
 

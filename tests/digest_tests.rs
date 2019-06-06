@@ -31,6 +31,7 @@
 )]
 
 use ring::{digest, test, test_file};
+use std::prelude::v1::*;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen_test::wasm_bindgen_test;
@@ -42,9 +43,8 @@ use wasm_bindgen_test::wasm_bindgen_test_configure;
 wasm_bindgen_test_configure!(run_in_browser);
 
 /// Test vectors from BoringSSL, Go, and other sources.
-#[cfg_attr(not(target_arch = "wasm32"), test)]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn digest_misc() {
+//#[test]
+pub fn digest_misc() {
     test::run(test_file!("digest_tests.txt"), |section, test_case| {
         assert_eq!(section, "");
         let digest_alg = test_case.consume_digest_alg("Hash").unwrap();
@@ -68,8 +68,9 @@ fn digest_misc() {
     });
 }
 
-mod digest_shavs {
+pub mod digest_shavs {
     use ring::{digest, test};
+    use std::prelude::v1::*;
 
     fn run_known_answer_test(digest_alg: &'static digest::Algorithm, test_file: test::File) {
         let section_name = &format!("L = {}", digest_alg.output_len);
@@ -97,16 +98,12 @@ mod digest_shavs {
     macro_rules! shavs_tests {
         ( $file_name:ident, $algorithm_name:ident ) => {
             #[allow(non_snake_case)]
-            mod $algorithm_name {
+            pub mod $algorithm_name {
                 use super::{run_known_answer_test, run_monte_carlo_test};
                 use ring::{digest, test_file};
 
-                #[cfg(target_arch = "wasm32")]
-                use wasm_bindgen_test::wasm_bindgen_test;
-
-                #[cfg_attr(not(target_arch = "wasm32"), test)]
-                #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-                fn short_msg_known_answer_test() {
+                //#[test]
+                pub fn short_msg_known_answer_test() {
                     run_known_answer_test(
                         &digest::$algorithm_name,
                         test_file!(concat!(
@@ -117,9 +114,8 @@ mod digest_shavs {
                     );
                 }
 
-                #[cfg_attr(not(target_arch = "wasm32"), test)]
-                #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-                fn long_msg_known_answer_test() {
+                //#[test]
+                pub fn long_msg_known_answer_test() {
                     run_known_answer_test(
                         &digest::$algorithm_name,
                         test_file!(concat!(
@@ -130,9 +126,8 @@ mod digest_shavs {
                     );
                 }
 
-                #[cfg_attr(not(target_arch = "wasm32"), test)]
-                #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-                fn monte_carlo_test() {
+                //#[test]
+                pub fn monte_carlo_test() {
                     run_monte_carlo_test(
                         &digest::$algorithm_name,
                         test_file!(concat!(
@@ -204,11 +199,9 @@ mod digest_shavs {
 /// These are not run in dev (debug) builds because they are too slow.
 macro_rules! test_i_u_f {
     ( $test_name:ident, $alg:expr) => {
-        #[cfg(not(debug_assertions))]
-        // TODO: #[cfg_attr(not(target_arch = "wasm32"), test)]
-        //       #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-        #[test]
-        fn $test_name() {
+        //#[cfg(not(debug_assertions))]
+        //#[test]
+        pub fn $test_name() {
             let mut input = [0; (digest::MAX_BLOCK_LEN + 1) * 3];
             let max = $alg.block_len + 1;
             for i in 0..(max * 3) {
@@ -266,11 +259,9 @@ test_i_u_f!(digest_test_i_u_f_sha512, digest::SHA512);
 /// This is not run in dev (debug) builds because it is too slow.
 macro_rules! test_large_digest {
     ( $test_name:ident, $alg:expr, $len:expr, $expected:expr) => {
-        #[cfg(not(debug_assertions))]
-        #[test]
-        // TODO: #[cfg_attr(not(target_arch = "wasm32"), test)]
-        //       #[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-        fn $test_name() {
+        //#[cfg(not(debug_assertions))]
+        //#[test]
+        pub fn $test_name() {
             let chunk = vec![123u8; 16 * 1024];
             let chunk_len = chunk.len() as u64;
             let mut ctx = digest::Context::new(&$alg);
@@ -290,7 +281,7 @@ macro_rules! test_large_digest {
 }
 
 // XXX: This test is too slow on Android ARM.
-#[cfg(any(not(target_os = "android"), not(target_arch = "arm")))]
+//#[cfg(any(not(target_os = "android"), not(target_arch = "arm")))]
 test_large_digest!(
     digest_test_large_digest_sha1,
     digest::SHA1_FOR_LEGACY_USE_ONLY,
@@ -338,9 +329,10 @@ test_large_digest!(
 // TODO: test_large_digest!(digest_test_large_digest_sha512_256,
 //                            digest::SHA512_256, 256 / 8, [ ... ]);
 
-#[cfg_attr(not(target_arch = "wasm32"), test)]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn test_fmt_algorithm() {
+//#[cfg_attr(not(target_arch = "wasm32"), test)]
+//#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
+//#[test]
+pub fn test_fmt_algorithm() {
     assert_eq!("SHA1", &format!("{:?}", digest::SHA1_FOR_LEGACY_USE_ONLY));
     assert_eq!("SHA256", &format!("{:?}", digest::SHA256));
     assert_eq!("SHA384", &format!("{:?}", digest::SHA384));
@@ -348,9 +340,8 @@ fn test_fmt_algorithm() {
     assert_eq!("SHA512_256", &format!("{:?}", digest::SHA512_256));
 }
 
-#[cfg_attr(not(target_arch = "wasm32"), test)]
-#[cfg_attr(target_arch = "wasm32", wasm_bindgen_test)]
-fn digest_test_fmt() {
+//#[test]
+pub fn digest_test_fmt() {
     assert_eq!(
         "SHA1:b7e23ec29af22b0b4e41da31e868d57226121c84",
         &format!(
