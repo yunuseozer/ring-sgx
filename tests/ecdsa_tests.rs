@@ -39,9 +39,10 @@ use ring::{
 
 // ECDSA *signing* tests are in src/ec/ecdsa/signing.rs.
 
-#[cfg(feature = "use_heap")]
-#[test]
-fn ecdsa_from_pkcs8_test() {
+//#[cfg(feature = "use_heap")]
+//#[test]
+#[allow(deprecated)]
+pub fn ecdsa_from_pkcs8_test() {
     test::run(
         test_file!("ecdsa_from_pkcs8_tests.txt"),
         |section, test_case| {
@@ -107,8 +108,8 @@ fn ecdsa_from_pkcs8_test() {
 }
 
 // Verify that, at least, we generate PKCS#8 documents that we can read.
-#[test]
-fn ecdsa_generate_pkcs8_test() {
+//#[test]
+pub fn ecdsa_generate_pkcs8_test() {
     let rng = rand::SystemRandom::new();
 
     for alg in &[
@@ -130,8 +131,8 @@ fn ecdsa_generate_pkcs8_test() {
     }
 }
 
-#[test]
-fn signature_ecdsa_verify_asn1_test() {
+//#[test]
+pub fn signature_ecdsa_verify_asn1_test() {
     test::run(
         test_file!("ecdsa_verify_asn1_tests.txt"),
         |section, test_case| {
@@ -172,8 +173,8 @@ fn signature_ecdsa_verify_asn1_test() {
     );
 }
 
-#[test]
-fn signature_ecdsa_verify_fixed_test() {
+//#[test]
+pub fn signature_ecdsa_verify_fixed_test() {
     test::run(
         test_file!("ecdsa_verify_fixed_tests.txt"),
         |section, test_case| {
@@ -215,8 +216,8 @@ fn signature_ecdsa_verify_fixed_test() {
     );
 }
 
-#[test]
-fn ecdsa_test_public_key_coverage() {
+//#[test]
+pub fn ecdsa_test_public_key_coverage() {
     const PRIVATE_KEY: &[u8] = include_bytes!("ecdsa_test_private_key_p256.p8");
     const PUBLIC_KEY: &[u8] = include_bytes!("ecdsa_test_public_key_p256.der");
     const PUBLIC_KEY_DEBUG: &str = include_str!("ecdsa_test_public_key_p256_debug.txt");

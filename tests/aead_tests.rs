@@ -31,20 +31,20 @@
     warnings
 )]
 
-use ring::{aead, error, test, test_file};
+use ring::{aead, error, test};
 
-#[test]
-fn aead_aes_gcm_128() {
+//#[test]
+pub fn aead_aes_gcm_128() {
     test_aead(&aead::AES_128_GCM, test_file!("aead_aes_128_gcm_tests.txt"));
 }
 
-#[test]
-fn aead_aes_gcm_256() {
+//#[test]
+pub fn aead_aes_gcm_256() {
     test_aead(&aead::AES_256_GCM, test_file!("aead_aes_256_gcm_tests.txt"));
 }
 
-#[test]
-fn aead_chacha20_poly1305() {
+//#[test]
+pub fn aead_chacha20_poly1305() {
     test_aead(
         &aead::CHACHA20_POLY1305,
         test_file!("aead_chacha20_poly1305_tests.txt"),
@@ -241,8 +241,8 @@ fn test_aead_key_sizes(aead_alg: &'static aead::Algorithm) {
 // won't crash or access out-of-bounds memory (when run under valgrind or
 // similar). The AES-128-GCM tests have some WRONG_NONCE_LENGTH test cases
 // that tests this more correctly.
-#[test]
-fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
+//#[test]
+pub fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     let nonce_len = aead::NONCE_LEN;
     let nonce = vec![0u8; nonce_len * 2];
 
@@ -258,8 +258,8 @@ fn test_aead_nonce_sizes() -> Result<(), error::Unspecified> {
     Ok(())
 }
 
-#[test]
-fn aead_chacha20_poly1305_openssh() {
+//#[test]
+pub fn aead_chacha20_poly1305_openssh() {
     // TODO: test_aead_key_sizes(...);
 
     test::run(
@@ -305,8 +305,8 @@ fn aead_chacha20_poly1305_openssh() {
     );
 }
 
-#[test]
-fn test_aead_key_debug() {
+//#[test]
+pub fn test_aead_key_debug() {
     let key_bytes = [0; 32];
 
     let key = aead::OpeningKey::new(&aead::AES_256_GCM, &key_bytes).unwrap();

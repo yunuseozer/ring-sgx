@@ -302,6 +302,7 @@ name = "ring"
 [dependencies]
 untrusted = { git = "https://github.com/briansmith/untrusted", tag = "ring-master" }
 libc = { version = "0.2.48", default_features = false }
+sgx_tstd = { rev = "v1.0.8", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }
 
 [target.'cfg(not(target_os = "ios"))'.dependencies]
 spin = { version = "0.5.0" }
@@ -320,12 +321,13 @@ cc = "1.0.26"
 
 [features]
 # These features are documented in the top-level module's documentation.
-default = ["use_heap", "dev_urandom_fallback"]
+default = ["use_heap", "mesalock_sgx"]
 dev_urandom_fallback = []
 internal_benches = []
 slow_tests = []
 test_logging = []
 use_heap = []
+mesalock_sgx = ["sgx_tstd"]
 
 # XXX: debug = false because of https://github.com/rust-lang/rust/issues/34122
 

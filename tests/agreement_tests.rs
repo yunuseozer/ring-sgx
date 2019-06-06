@@ -32,9 +32,10 @@
 )]
 
 use ring::{agreement, error, rand, test, test_file};
+use std::prelude::v1::*;
 
-#[test]
-fn agreement_agree_ephemeral() {
+//#[test]
+pub fn agreement_agree_ephemeral() {
     let rng = rand::SystemRandom::new();
 
     test::run(test_file!("agreement_tests.txt"), |section, test_case| {
@@ -90,8 +91,8 @@ fn agreement_agree_ephemeral() {
     });
 }
 
-#[test]
-fn test_agreement_ecdh_x25519_rfc_iterated() {
+//#[test]
+pub fn test_agreement_ecdh_x25519_rfc_iterated() {
     let mut k = h("0900000000000000000000000000000000000000000000000000000000000000");
     let mut u = k.clone();
 

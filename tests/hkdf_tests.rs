@@ -33,8 +33,8 @@
 
 use ring::{error, hkdf, test, test_file};
 
-#[test]
-fn hkdf_tests() {
+//#[test]
+pub fn hkdf_tests() {
     test::run(test_file!("hkdf_tests.txt"), |section, test_case| {
         assert_eq!(section, "");
         let digest_alg = test_case

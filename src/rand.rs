@@ -126,7 +126,7 @@ use self::fuchsia::fill as fill_impl;
 
 use crate::sealed;
 
-#[cfg(target_os = "linux")]
+#[cfg(all(not(feature = "mesalock_sgx"), target_os = "linux"))]
 mod sysrand_chunk {
     use crate::error;
     use libc::{self, size_t};
@@ -159,6 +159,25 @@ mod sysrand_chunk {
             return Err(error::Unspecified);
         }
         Ok(r as usize)
+    }
+}
+
+#[cfg(feature = "mesalock_sgx")]
+mod sysrand_chunk {
+    use crate::error;
+
+    extern {
+        fn sgx_read_rand(p: * mut u8, l: usize) -> u32;
+    }
+
+    #[inline]
+    pub fn chunk(dest: &mut [u8]) -> Result<usize, error::Unspecified> {
+        match unsafe { sgx_read_rand(dest.as_mut_ptr(),
+                                     dest.len()) } {
+            0 => Ok(dest.len()),
+            _ => Err(error::Unspecified),
+        }
+
     }
 }
 

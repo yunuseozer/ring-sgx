@@ -40,6 +40,7 @@
 
 #![allow(box_pointers)]
 
+use std::prelude::v1::*;
 use crate::{
     arithmetic::montgomery::*,
     bits, bssl, error,
@@ -51,7 +52,7 @@ use core::{
     ops::{Deref, DerefMut},
 };
 use libc::size_t;
-use std::borrow::ToOwned as _; // TODO: Remove; Redundant as of Rust 1.36.
+//use std::borrow::ToOwned as _; // TODO: Remove; Redundant as of Rust 1.36.
 use untrusted;
 
 pub unsafe trait Prime {}
