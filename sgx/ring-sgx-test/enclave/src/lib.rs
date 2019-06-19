@@ -138,6 +138,7 @@ tests::rsa_tests::test_signature_rsa_pss_verify,
 tests::rsa_tests::test_signature_rsa_primitive_verification,
 tests::rsa_tests::rsa_test_public_key_coverage,
 tests::signature_tests::signature_impl_test,
+tests::rand_tests::rand_test_system_random_lengths,
 );
 
     sgx_status_t::SGX_SUCCESS

@@ -9,3 +9,4 @@ pub mod pbkdf2_tests;
 pub mod quic_tests;
 pub mod rsa_tests;
 pub mod signature_tests;
+pub mod rand_tests;
