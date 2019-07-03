@@ -145,6 +145,7 @@ include = [
     "src/debug.rs",
     "src/digest.rs",
     "src/digest/sha1.rs",
+    "src/digest/sha2.rs",
     "src/ec/curve25519/ed25519/digest.rs",
     "src/ec/curve25519/ed25519.rs",
     "src/ec/curve25519/ed25519/signing.rs",
