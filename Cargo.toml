@@ -152,6 +152,7 @@ include = [
     "src/ec/curve25519/ed25519/verification.rs",
     "src/ec/curve25519/ed25519/ed25519_pkcs8_v2_template.der",
     "src/ec/curve25519.rs",
+    "src/ec/curve25519/scalar.rs",
     "src/ec/curve25519/ops.rs",
     "src/ec/curve25519/x25519.rs",
     "src/ec.rs",
