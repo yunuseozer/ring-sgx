@@ -305,8 +305,8 @@ name = "ring"
 
 [dependencies]
 untrusted = { git = "https://github.com/briansmith/untrusted", tag = "ring-master" }
-libc = { git = "https://github.com/mesalock-linux/libc-sgx", default_features = false }
 sgx_tstd = { rev = "v1.0.8", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }
+sgx_libc = { rev = "v1.0.8", git = "https://github.com/baidu/rust-sgx-sdk.git", optional = true }
 
 [target.'cfg(all(any(target_arch = "aarch64", target_arch = "arm", target_arch = "x86", target_arch = "x86_64"), not(target_os = "ios")))'.dependencies]
 spin = { version = "0.5.0", default-features = false }
@@ -329,7 +329,7 @@ internal_benches = []
 slow_tests = []
 test_logging = []
 use_heap = []
-mesalock_sgx = ["sgx_tstd", "use_heap"]
+mesalock_sgx = ["sgx_tstd", "sgx_libc", "use_heap"]
 
 # XXX: debug = false because of https://github.com/rust-lang/rust/issues/34122
 
